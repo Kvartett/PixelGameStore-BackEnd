@@ -4,9 +4,9 @@ import { sessionsCollection, usersCollection } from "../database/db.js"
 import { userSchema } from "../models/user.model.js"
 
 export async function signUp(req, res) {
-    const { email, password, username, image } = req.body
+    const { email, password, username } = req.body
 
-    const { error } = userSchema.validate({ email, password, username, image }, { abortEarly: false })
+    const { error } = userSchema.validate({ email, password, username }, { abortEarly: false })
 
     if (error) {
         const errors = error.details.map((detail) => detail.message)
@@ -20,7 +20,7 @@ export async function signUp(req, res) {
             return res.status(409).send("E-mail ja cadastrado!")
         }
         const passwordHash = bcrypt.hashSync(password, 12)
-        await usersCollection.insertOne({ email, password: passwordHash, username, image })
+        await usersCollection.insertOne({ email, password: passwordHash, username })
         res.status(201).send("Usuario cadastrado!")
 
     } catch (err) {
@@ -39,7 +39,7 @@ export async function signIn(req, res) {
             const token = uuid()
 
             await sessionsCollection.insertOne({ token, email })
-            res.status(200).send({ username: userExist.username, email: userExist.email, image: userExist.image, token })
+            res.status(200).send({ username: userExist.username, email: userExist.email, token })
         } else {
             res.status(500).send("Usuario não encontrado! E-mail ou senha incorretos.")
         }
